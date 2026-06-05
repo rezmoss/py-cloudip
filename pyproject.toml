@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "py-cloudip"
-version = "0.1.0"
+version = "0.1.1"
 description = "Fast cloud-provider IP detection (AWS, GCP, Azure, Cloudflare, DigitalOcean, Oracle)"
 readme = "README.md"
 requires-python = ">=3.8"
