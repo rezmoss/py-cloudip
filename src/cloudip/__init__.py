@@ -37,7 +37,7 @@ from .types import (
     VersionInfo,
 )
 
-__version__ = "0.1.1"
+from .__about__ import __version__
 
 __all__ = [
     "Detector",

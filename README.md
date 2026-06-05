@@ -1,5 +1,10 @@
 # py-cloudip
 
+[![PyPI version](https://img.shields.io/pypi/v/py-cloudip.svg)](https://pypi.org/project/py-cloudip/)
+[![Python versions](https://img.shields.io/pypi/pyversions/py-cloudip.svg)](https://pypi.org/project/py-cloudip/)
+[![CI](https://github.com/rezmoss/py-cloudip/actions/workflows/ci.yml/badge.svg)](https://github.com/rezmoss/py-cloudip/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/pypi/l/py-cloudip.svg)](https://github.com/rezmoss/py-cloudip/blob/main/LICENSE)
+
 Fast cloud-provider IP detection for Python. Identify whether an IP address
 belongs to **AWS, GCP, Azure, Cloudflare, DigitalOcean, or Oracle Cloud** via
 longest-prefix-match lookups over a Patricia/binary trie.
