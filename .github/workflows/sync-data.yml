@@ -5,6 +5,10 @@ on:
     - cron: '0 6 * * 1'   # Mondays 06:00 UTC
   workflow_dispatch:
 
+concurrency:
+  group: sync-data
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -54,7 +58,10 @@ jobs:
           git add src/cloudip/data src/cloudip/__about__.py
           git commit -m "chore(data): sync cloudip-db ${data_version} (v${new_version})"
           git tag "v${new_version}"
-          git push origin HEAD --tags
+          # Remote main may have advanced since checkout; rebase before pushing.
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin "v${new_version}"
 
       - name: Build sdist + wheel
         if: steps.changes.outputs.changed == 'true'
@@ -63,3 +70,5 @@ jobs:
       - name: Publish to PyPI (Trusted Publishing)
         if: steps.changes.outputs.changed == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
