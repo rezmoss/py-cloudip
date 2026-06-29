@@ -48,6 +48,7 @@ jobs:
           python -m pytest tests/ -q
 
       - name: Bump patch, commit, tag, push
+        id: bump
         if: steps.changes.outputs.changed == 'true'
         run: |
           data_version="$(python -c "import json;print(json.load(open('src/cloudip/data/version.json'))['version'])")"
@@ -62,6 +63,8 @@ jobs:
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
           git push origin "v${new_version}"
+          echo "new_version=${new_version}" >> "$GITHUB_OUTPUT"
+          echo "data_version=${data_version}" >> "$GITHUB_OUTPUT"
 
       - name: Build sdist + wheel
         if: steps.changes.outputs.changed == 'true'
@@ -72,3 +75,21 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true
+
+      # Tags pushed with GITHUB_TOKEN do not trigger release.yml (GitHub's
+      # recursion guard), so the tag, the PyPI publish, and the GitHub Release
+      # all happen here in one job to keep them in lockstep.
+      - name: Create GitHub Release
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+          DATA_VERSION: ${{ steps.bump.outputs.data_version }}
+        run: |
+          gh release view "v${NEW_VERSION}" >/dev/null 2>&1 \
+            && { echo "release v${NEW_VERSION} already exists"; exit 0; }
+          gh release create "v${NEW_VERSION}" dist/* \
+            --title "v${NEW_VERSION}" \
+            --notes "Automated weekly data sync — cloudip-db \`${DATA_VERSION}\`.
+
+          Published to PyPI: https://pypi.org/project/py-cloudip/${NEW_VERSION}/"
